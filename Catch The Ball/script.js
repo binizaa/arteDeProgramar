@@ -29,11 +29,37 @@ let catcher = {
 
 let score = 0;
 let mouseX = canvas.width / 2;
+let musicStarted = false;
+
+// ☁️ Nubes en el fondo
+let clouds = [
+  { x: 50, y: 100, size: 40 },
+  { x: 250, y: 150, size: 50 },
+  { x: 150, y: 200, size: 35 },
+  { x: 320, y: 80, size: 45 },
+  { x: 80, y: 250, size: 40 },
+  { x: 300, y: 220, size: 55 },
+];
+
+// 🎵 Configuración de música
+const bgMusic = document.getElementById("bgMusic");
+
+// Función para iniciar la música
+function startMusic() {
+  if (!musicStarted && bgMusic) {
+    bgMusic.volume = 0.3; // Volumen bajo para no molestar
+    bgMusic.play().catch((e) => {
+      console.log("💡 Música no disponible. Agrega un archivo jazz.mp3 en la carpeta del juego.");
+    });
+    musicStarted = true;
+  }
+}
 
 // 🖱 Evento: mover el mouse
 canvas.addEventListener("mousemove", (e) => {
   const rect = canvas.getBoundingClientRect();
   mouseX = e.clientX - rect.left;
+  startMusic(); // Inicia la música cuando mueves el mouse
 });
 
 // ⚙️ Actualizar posición y lógica
@@ -71,9 +97,37 @@ function resetBall() {
   ball.y = 0;
 }
 
+// ☁️ Dibujar nubes
+function drawCloud(x, y, size) {
+  ctx.beginPath();
+  ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+  ctx.arc(x, y, size, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + size * 0.5, y, size * 0.8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + size, y, size * 0.7, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(x + size * 0.3, y - size * 0.5, size * 0.6, 0, Math.PI * 2);
+  ctx.fill();
+}
+
 // 🎨 Dibujar todo en pantalla
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  // Fondo azul cielo
+  const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+  gradient.addColorStop(0, "#87CEEB");
+  gradient.addColorStop(0.5, "#98D8F0");
+  gradient.addColorStop(1, "#B0E0E6");
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  // Dibuja las nubes
+  clouds.forEach((cloud) => {
+    drawCloud(cloud.x, cloud.y, cloud.size);
+  });
 
   // Dibuja la bola
   ctx.beginPath();
