@@ -1,3 +1,4 @@
+/* ... (body, container, h1, #status, #timer-display se quedan igual) ... */
 body {
     font-family: Arial, sans-serif;
     display: flex;
@@ -21,10 +22,17 @@ h1 {
 }
 
 #status {
-    margin: 20px 0;
+    margin: 20px 0 0;
     font-size: 1.2em;
     font-weight: bold;
     color: #555;
+}
+
+#timer-display {
+    margin: 5px 0 20px;
+    font-size: 1em;
+    color: #888;
+    font-weight: normal;
 }
 
 .board {
@@ -35,6 +43,7 @@ h1 {
     margin: 0 auto 20px;
     border: 3px solid #333;
     background-color: #333;
+    position: relative; /* 👈 MUY IMPORTANTE: Para posicionar la línea */
 }
 
 .cell {
@@ -48,7 +57,8 @@ h1 {
     font-weight: bold;
     cursor: pointer;
     transition: background-color 0.2s;
-    user-select: none; /* Evita la selección de texto */
+    user-select: none;
+    /* ❗️Quitamos 'position: relative' y 'overflow: hidden' de aquí */
 }
 
 .cell:hover {
@@ -77,4 +87,85 @@ h1 {
 
 #reset-button:hover {
     background-color: #45a049;
+}
+
+/* ===========================================
+   ⛔️ BORRA TODAS LAS REGLAS VIEJAS DE 
+   '.cell.winning-cell::after' QUE TE DI ANTES.
+   =========================================== */
+
+
+/* ===========================================
+         ✅ NUEVO: Estilo para la LÍNEA ÚNICA
+   (Este es el reemplazo de toda la sección borrada)
+=========================================== */
+.board[class*='win-condition-']::after {
+    content: '';
+    position: absolute;
+    background-color: #222; /* Línea negra/gris oscura */
+    z-index: 10; /* Para que esté por encima de X/O */
+    height: 6px; /* Grosor de la línea */
+    border-radius: 3px;
+    /* Las dimensiones y posición se definen abajo */
+}
+
+/* --- FILAS --- */
+/* Fila 1 (índice 0) */
+.board.win-condition-0::after {
+    width: 310px; /* Ancho total del grid (100*3 + 5*2) */
+    top: 50px;    /* Mitad de la primera celda */
+    left: 0;
+}
+/* Fila 2 (índice 1) */
+.board.win-condition-1::after {
+    width: 310px;
+    top: 155px;   /* 100px (celda 1) + 5px (gap) + 50px (mitad celda 2) */
+    left: 0;
+}
+/* Fila 3 (índice 2) */
+.board.win-condition-2::after {
+    width: 310px;
+    top: 260px;   /* 200px (celdas 1,2) + 10px (gaps) + 50px (mitad celda 3) */
+    left: 0;
+}
+
+/* --- COLUMNAS --- */
+/* Columna 1 (índice 3) */
+.board.win-condition-3::after {
+    height: 310px; /* Alto total del grid */
+    width: 6px;
+    top: 0;
+    left: 50px;
+}
+/* Columna 2 (índice 4) */
+.board.win-condition-4::after {
+    height: 310px;
+    width: 6px;
+    top: 0;
+    left: 155px; /* 100px (celda 1) + 5px (gap) + 50px (mitad celda 2) */
+}
+/* Columna 3 (índice 5) */
+.board.win-condition-5::after {
+    height: 310px;
+    width: 6px;
+    top: 0;
+    left: 260px;
+}
+
+/* --- DIAGONALES --- */
+/* Diagonal 1 (índice 6) */
+.board.win-condition-6::after {
+    width: 390px; /* Más larga para cruzar (aprox. 310 * sqrt(2)) */
+    top: 155px;   /* Centro del tablero */
+    left: 155px;  /* Centro del tablero */
+    transform-origin: center;
+    transform: translate(-50%, -50%) rotate(45deg);
+}
+/* Diagonal 2 (índice 7) */
+.board.win-condition-7::after {
+    width: 390px;
+    top: 155px;
+    left: 155px;
+    transform-origin: center;
+    transform: translate(-50%, -50%) rotate(-45deg);
 }
