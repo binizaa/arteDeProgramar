@@ -9,6 +9,16 @@
 <body style="margin: 0; padding: 0; overflow-x: hidden;">
     <div class="container">
         <h1>Juego de Gato (Tic-Tac-Toe)</h1>
+
+        <!-- Nuevo: selector de modo -->
+        <div style="margin-bottom: 12px;">
+            <label for="mode">Modo:</label>
+            <select id="mode">
+                <option value="pvp">2 Jugadores</option>
+                <option value="pvc">Jugador vs CPU (CPU = O)</option>
+            </select>
+        </div>
+
         <div id="status">Turno de: **X**</div>
 
         <div class="board" id="board">
