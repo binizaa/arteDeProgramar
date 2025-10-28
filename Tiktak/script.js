@@ -24,8 +24,8 @@ const winningConditions = [
 ];
 
 // Mensajes
-const currentPlayerTurn = () => `Turno de: **${currentPlayer}**`;
-const winningMessage = () => `¡El jugador **${currentPlayer}** ha ganado! 🎉`;
+const currentPlayerTurn = () => `Turno de: ${currentPlayer}`;
+const winningMessage = () => `¡El jugador ${currentPlayer} ha ganado! 🎉`;
 const drawMessage = () => `¡Es un empate! 🤝`;
 
 statusDisplay.innerHTML = currentPlayerTurn();
