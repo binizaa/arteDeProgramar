@@ -1,13 +1,39 @@
 body {
-  margin: 0;
-  background: #111;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+    margin: 0;
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column; /* 👈 MODIFICADO: Para apilar verticalmente */
+    gap: 20px; /* 👈 NUEVO: Espacio entre controles y juego */
+    font-family: Arial, sans-serif; /* 👈 NUEVO: Fuente legible */
+    color: white; /* 👈 NUEVO: Color de texto para las etiquetas */
 }
 
 canvas {
-  border: 2px solid #fff;
-  background: #000;
+    border: 2px solid #fff;
+    background: #000;
 }
+
+/* 👇 SECCIÓN NUEVA 👇 */
+.controls-container {
+    display: flex;
+    gap: 30px; /* Espacio entre los dos selectores */
+}
+
+.control-group {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Espacio entre etiqueta y selector */
+}
+
+input[type="color"] {
+    width: 40px;
+    height: 25px;
+    border: 1px solid #555;
+    padding: 2px;
+    cursor: pointer;
+    background: none;
+}
+/* 🔼 FIN SECCIÓN NUEVA 🔼 */

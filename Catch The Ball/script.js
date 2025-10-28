@@ -5,6 +5,11 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
+// 👇 SECCIÓN NUEVA: Referencias a los controles de color 👇
+const ballColorInput = document.getElementById("ballColor");
+const catcherColorInput = document.getElementById("catcherColor");
+// 🔼 FIN SECCIÓN NUEVA 🔼
+
 // 🔧 Ajustes del lienzo
 canvas.width = 400;
 canvas.height = 600;
@@ -15,7 +20,7 @@ let ball = {
   y: 0,
   radius: 15,
   speed: 3,
-  color: "red",
+  color: ballColorInput.value, // 👈 MODIFICADO: Lee el valor inicial
 };
 
 // 🧍 Control del jugador (la barra)
@@ -24,7 +29,7 @@ let catcher = {
   height: 10,
   x: canvas.width / 2 - 40, // Centrado al inicio
   y: canvas.height - 40,
-  color: "white",
+  color: catcherColorInput.value, // 👈 MODIFICADO: Lee el valor inicial
 };
 
 let score = 0;
@@ -35,6 +40,17 @@ canvas.addEventListener("mousemove", (e) => {
   const rect = canvas.getBoundingClientRect();
   mouseX = e.clientX - rect.left;
 });
+
+// 👇 SECCIÓN NUEVA: Eventos para actualizar colores en vivo 👇
+ballColorInput.addEventListener("input", (e) => {
+    ball.color = e.target.value;
+});
+
+catcherColorInput.addEventListener("input", (e) => {
+    catcher.color = e.target.value;
+});
+// 🔼 FIN SECCIÓN NUEVA 🔼
+
 
 // ⚙️ Actualizar posición y lógica
 function update() {
@@ -78,11 +94,11 @@ function draw() {
   // Dibuja la bola
   ctx.beginPath();
   ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-  ctx.fillStyle = ball.color;
+  ctx.fillStyle = ball.color; // Ya no es "red", usa el valor del objeto
   ctx.fill();
 
   // Dibuja el catcher
-  ctx.fillStyle = catcher.color;
+  ctx.fillStyle = catcher.color; // Ya no es "white", usa el valor del objeto
   ctx.fillRect(catcher.x, catcher.y, catcher.width, catcher.height);
 
   // Dibuja el score
