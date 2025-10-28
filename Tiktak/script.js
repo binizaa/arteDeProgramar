@@ -1,12 +1,15 @@
+// ...existing code...
 const cells = document.querySelectorAll('.cell');
 const statusDisplay = document.getElementById('status');
 const resetButton = document.getElementById('reset-button');
 const board = document.getElementById('board');
+const modeSelect = document.getElementById('mode'); // Nuevo: selector de modo
 
 // Estado del juego
 let gameActive = true;
 let currentPlayer = 'X';
 let gameState = ["", "", "", "", "", "", "", "", ""]; // Representa el tablero (9 celdas)
+let mode = modeSelect ? modeSelect.value : 'pvp'; // 'pvp' or 'pvc'
 
 // Posibilidades de victoria (índices de las celdas)
 const winningConditions = [
@@ -38,9 +41,19 @@ function handleCellClick(clickedCellEvent) {
         return;
     }
 
+    // Si estamos en modo vs CPU, permitir clic solo cuando es el turno del jugador humano (X)
+    if (mode === 'pvc' && currentPlayer !== 'X') {
+        return;
+    }
+
     // Actualiza el estado del juego y la interfaz
     handleCellPlayed(clickedCell, clickedCellIndex);
     handleResultValidation();
+
+    // Si modo vs CPU y el juego sigue activo y ahora es turno de la CPU, pedir movimiento
+    if (mode === 'pvc' && gameActive && currentPlayer === 'O') {
+        makeComputerMove();
+    }
 }
 
 // Actualiza el estado y la interfaz después de un movimiento
@@ -105,8 +118,94 @@ function handleRestartGame() {
         cell.classList.remove('x');
         cell.classList.remove('o');
     });
+
+    // Si se reinicia en modo vs CPU y la CPU fuera a jugar primero (no implementado por defecto),
+    // podríamos arrancar su movimiento aquí. Actualmente CPU juega O, jugador X comienza.
 }
 
 // Añade los 'event listeners' (escuchadores de eventos)
 cells.forEach(cell => cell.addEventListener('click', handleCellClick));
 resetButton.addEventListener('click', handleRestartGame);
+
+// Nuevo: escucha cambios de modo
+if (modeSelect) {
+    modeSelect.addEventListener('change', (e) => {
+        mode = e.target.value;
+        handleRestartGame();
+    });
+}
+
+// ---- Lógica simple de CPU ----
+// Estrategia: 1) gana si puede, 2) bloquea si el jugador puede ganar, 3) centro, 4) esquinas, 5) aleatorio
+
+function makeComputerMove() {
+    if (!gameActive) return;
+    if (currentPlayer !== 'O') return;
+
+    // Pequeña demora para simular "pensar"
+    setTimeout(() => {
+        const move = findBestMove('O');
+        if (move === null) return;
+        const cell = document.querySelector(`.cell[data-index="${move}"]`);
+        if (!cell) return;
+        handleCellPlayed(cell, move);
+        handleResultValidation();
+    }, 350);
+}
+
+function findBestMove(player) {
+    const opponent = player === 'O' ? 'X' : 'O';
+
+    // 1) Ganar si es posible
+    for (let i = 0; i < 9; i++) {
+        if (gameState[i] === "") {
+            gameState[i] = player;
+            if (checkWinFor(player)) {
+                gameState[i] = "";
+                return i;
+            }
+            gameState[i] = "";
+        }
+    }
+
+    // 2) Bloquear al oponente si puede ganar
+    for (let i = 0; i < 9; i++) {
+        if (gameState[i] === "") {
+            gameState[i] = opponent;
+            if (checkWinFor(opponent)) {
+                gameState[i] = "";
+                return i;
+            }
+            gameState[i] = "";
+        }
+    }
+
+    // 3) Tomar centro si está libre
+    if (gameState[4] === "") return 4;
+
+    // 4) Tomar una esquina
+    const corners = [0, 2, 6, 8];
+    for (let c of corners) {
+        if (gameState[c] === "") return c;
+    }
+
+    // 5) Cualquier espacio disponible (aleatorio)
+    const empties = [];
+    for (let i = 0; i < 9; i++) if (gameState[i] === "") empties.push(i);
+    if (empties.length === 0) return null;
+    return empties[Math.floor(Math.random() * empties.length)];
+}
+
+function checkWinFor(player) {
+    for (let condition of winningConditions) {
+        let [a, b, c] = condition;
+        if (gameState[a] === player && gameState[b] === player && gameState[c] === player) {
+            return true;
+        }
+    }
+    return false;
+}
+
+// Si el modo es pvc y la CPU debe moverse al inicio (si quisieras permitir que CPU empiece),
+// podrías comprobar aquí y llamar a makeComputerMove() cuando corresponda.
+// ...existing code...
