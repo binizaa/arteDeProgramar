@@ -1,4 +1,5 @@
 body {
+    background-image: url('https://thumbs.dreamstime.com/b/dos-gatos-graciosos-se-toman-un-selfie-en-la-playa-humor-creado-con-inteligencia-artificial-generado-por-ai-295411239.jpg');
     font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
@@ -6,11 +7,19 @@ body {
     min-height: 100vh;
     margin: 0;
     background-color: #f4f4f9;
+
+    /* Evita que la imagen se repita y la muestra una sola vez */
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain; /* usar "cover" si prefieres que llene todo el fondo */
 }
 
 .container {
     text-align: center;
-    background: white;
+    /* fondo reemplazado por imagen */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     padding: 30px;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
