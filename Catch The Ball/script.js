@@ -11,7 +11,7 @@ canvas.height = 600;
 
 // 🏀 Configuración de la bola
 let ball = {
-  x: Math.random() * 380 + 10, // Posición aleatoria inicial (evita los bordes)
+  x: Math.random() * 380 + 10, // Posición aleatoria inicial
   y: 0,
   radius: 15,
   speed: 3,
@@ -22,7 +22,7 @@ let ball = {
 let catcher = {
   width: 80,
   height: 10,
-  x: canvas.width / 2 - 40, // Centrado al inicio
+  x: canvas.width / 2 - 40,
   y: canvas.height - 40,
   color: "white",
 };
@@ -43,15 +43,18 @@ let clouds = [
 
 // 🎵 Configuración de música
 const bgMusic = document.getElementById("bgMusic");
+const musicBtn = document.getElementById("musicBtn");
 
-// Función para iniciar la música
+// 🟢 Función para iniciar la música
 function startMusic() {
   if (!musicStarted && bgMusic) {
-    bgMusic.volume = 0.3; // Volumen bajo para no molestar
-    bgMusic.play().catch((e) => {
-      console.log("💡 Música no disponible. Agrega un archivo jazz.mp3 en la carpeta del juego.");
+    bgMusic.volume = 0.3; // volumen bajo
+    bgMusic.play().catch(() => {
+      console.log("💡 No se pudo reproducir la música automáticamente. Usa el botón para iniciarla.");
     });
     musicStarted = true;
+    musicBtn.textContent = "⏸️ Pausar música";
+    musicBtn.setAttribute("aria-pressed", "true");
   }
 }
 
@@ -59,7 +62,22 @@ function startMusic() {
 canvas.addEventListener("mousemove", (e) => {
   const rect = canvas.getBoundingClientRect();
   mouseX = e.clientX - rect.left;
-  startMusic(); // Inicia la música cuando mueves el mouse
+  startMusic(); // inicia la música al mover el mouse (solo una vez)
+});
+
+// 🔘 Evento: clic en el botón de música
+musicBtn.addEventListener("click", () => {
+  if (bgMusic.paused) {
+    bgMusic.volume = 0.3;
+    bgMusic.play();
+    musicBtn.textContent = "⏸️ Pausar música";
+    musicBtn.setAttribute("aria-pressed", "true");
+    musicStarted = true;
+  } else {
+    bgMusic.pause();
+    musicBtn.textContent = "▶️ Reproducir música";
+    musicBtn.setAttribute("aria-pressed", "false");
+  }
 });
 
 // ⚙️ Actualizar posición y lógica
@@ -67,7 +85,7 @@ function update() {
   // Mueve la bola
   ball.y += ball.speed;
 
-  // Actualiza la posición del catcher
+  // Actualiza posición del catcher
   catcher.x = mouseX - catcher.width / 2;
 
   // 🧮 Detección de colisión (bola vs catcher)
@@ -78,13 +96,12 @@ function update() {
   ) {
     score++;
     resetBall();
-    // Aumenta un poco la dificultad cada 5 puntos
-    if (score % 5 === 0) ball.speed += 0.5;
+    if (score % 5 === 0) ball.speed += 0.5; // aumenta dificultad
   }
 
   // 🚫 Si la bola cae fuera del canvas
   if (ball.y > canvas.height) {
-    alert(`💀 Game Over! Score: ${score}`);
+    alert(`💀 Game Over! Puntuación: ${score}`);
     score = 0;
     ball.speed = 3;
     resetBall();
@@ -152,4 +169,5 @@ function gameLoop() {
   requestAnimationFrame(gameLoop);
 }
 
+// ▶️ Inicia el juego
 gameLoop();
