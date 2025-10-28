@@ -1,15 +1,19 @@
 body {
-  margin: 0;
-  background: #111;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
+    margin: 0;
+    background: #111;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column; /* 👈 MODIFICADO: Para apilar verticalmente */
+    gap: 20px; /* 👈 NUEVO: Espacio entre controles y juego */
+    font-family: Arial, sans-serif; /* 👈 NUEVO: Fuente legible */
+    color: white; /* 👈 NUEVO: Color de texto para las etiquetas */
 }
 
 canvas {
-  border: 2px solid #fff;
-  background: #000;
+    border: 2px solid #fff;
+    background: #000;
 }
 
 #musicBtn {
