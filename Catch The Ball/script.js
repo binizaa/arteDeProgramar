@@ -1,3 +1,4 @@
+
 // 🎮 Juego: Catch the Ball
 // Explicación: Mueves una barra con el mouse para atrapar una bola que cae.
 // Si la atrapas, ganas puntos. Si no, se reinicia el juego.
@@ -31,6 +32,40 @@ let score = 0;
 let mouseX = canvas.width / 2;
 let musicStarted = false;
 
+// ⚠ Audio sintetizado (sin archivo): Web Audio API
+let audioCtx = null;
+function initAudioIfNeeded() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  }
+}
+
+// Función para reproducir un beep corto al subir el score
+function playScoreBeep() {
+  try {
+    initAudioIfNeeded();
+    if (audioCtx.state === "suspended") {
+      // resume normalmente se desbloquea con interacción (el mousemove ya llama startMusic)
+      audioCtx.resume().catch(() => {});
+    }
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(880, now); // tono
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.2, now + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start(now);
+    osc.stop(now + 0.09);
+  } catch (e) {
+    // silencioso si falla
+    console.warn("Audio beep failed:", e);
+  }
+}
+
 // ☁️ Nubes en el fondo
 let clouds = [
   { x: 50, y: 100, size: 40 },
@@ -53,13 +88,18 @@ function startMusic() {
     });
     musicStarted = true;
   }
+  // Intentar inicializar AudioContext al primer movimiento (sin botón)
+  initAudioIfNeeded();
+  if (audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume().catch(() => {});
+  }
 }
 
 // 🖱 Evento: mover el mouse
 canvas.addEventListener("mousemove", (e) => {
   const rect = canvas.getBoundingClientRect();
   mouseX = e.clientX - rect.left;
-  startMusic(); // Inicia la música cuando mueves el mouse
+  startMusic(); // Inicia la música / inicializa audio cuando mueves el mouse
 });
 
 // ⚙️ Actualizar posición y lógica
@@ -77,6 +117,8 @@ function update() {
     ball.x <= catcher.x + catcher.width
   ) {
     score++;
+    // reproducir beep sintetizado cuando sube el score
+    playScoreBeep();
     resetBall();
     // Aumenta un poco la dificultad cada 5 puntos
     if (score % 5 === 0) ball.speed += 0.5;
