@@ -136,8 +136,8 @@ function draw() {
   ctx.fill();
 
   // Dibuja el catcher
-  ctx.fillStyle = catcher.color;
-  ctx.fillRect(catcher.x, catcher.y, catcher.width, catcher.height);
+  // Reemplazamos la línea blanca por una canasta caricaturesca
+  drawBasket(catcher);
 
   // Dibuja el score
   ctx.fillStyle = "white";
@@ -153,3 +153,84 @@ function gameLoop() {
 }
 
 gameLoop();
+
+// Dibuja una canasta caricaturesca y simpática en la posición del catcher
+function drawBasket(c) {
+  const x = c.x;
+  const y = c.y;
+  const w = c.width;
+  const h = c.height;
+
+  ctx.save();
+
+  // Permitimos que la canasta sea visualmente más alta que el bbox original
+  const basketH = Math.max(h * 4, 24);
+  const rx = w / 2;
+  const ry = basketH;
+  const cx = x + w / 2; // centro horizontal
+  const cy = y - basketH * 0.75; // centro vertical de la elipse (arriba del y del catcher)
+
+  // Sombra debajo
+  ctx.fillStyle = 'rgba(0,0,0,0.12)';
+  ctx.beginPath();
+  ctx.ellipse(cx, y + h, rx, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Cazo semicircular (ahora mirando hacia arriba)
+  ctx.fillStyle = '#8B5A2B';
+  ctx.beginPath();
+  // Arco superior ahora mira hacia arriba
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI);
+  // Base recta ahora en la parte inferior
+  ctx.lineTo(cx - rx, cy);
+  ctx.lineTo(cx + rx, cy);
+  ctx.closePath();
+  ctx.fill();
+
+  // Cavidad interior más clara para dar profundidad
+  ctx.fillStyle = '#C27C4A';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy - ry * 0.12, rx * 0.9, ry * 0.72, 0, 0, Math.PI);
+  ctx.lineTo(cx - rx * 0.9, cy);
+  ctx.lineTo(cx + rx * 0.9, cy);
+  ctx.closePath();
+  ctx.fill();
+
+  // Borde/rim (trazo sobre el arco)
+  ctx.strokeStyle = '#6B3E1C';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, rx, ry, 0, 0, Math.PI);
+  ctx.stroke();
+
+  // Líneas de tejido como arcos interiores para dar textura
+  ctx.strokeStyle = '#A0522D';
+  ctx.lineWidth = 1.5;
+  for (let i = 1; i <= 3; i++) {
+    const factor = 1 - i * 0.18;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy - ry * 0.12, rx * factor, ry * 0.72, 0, 0, Math.PI);
+    ctx.stroke();
+  }
+
+  // Carita simpática en la parte frontal del cuenco
+  const faceX = cx;
+  const faceY = cy + ry * 0.1; // Movemos la cara más abajo del centro
+  const eyeOffset = Math.min(w * 0.14, 10);
+
+  ctx.fillStyle = 'white';
+  ctx.beginPath(); ctx.arc(faceX - eyeOffset, faceY, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(faceX + eyeOffset, faceY, 4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'black';
+  ctx.beginPath(); ctx.arc(faceX - eyeOffset, faceY, 1.8, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(faceX + eyeOffset, faceY, 1.8, 0, Math.PI * 2); ctx.fill();
+
+  // Sonrisa feliz (curva hacia arriba)
+  ctx.strokeStyle = 'black';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.arc(faceX, faceY + 2, 6, 0, Math.PI, false); // false para curva hacia arriba
+  ctx.stroke();
+
+  ctx.restore();
+}
