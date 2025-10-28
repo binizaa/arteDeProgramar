@@ -165,7 +165,8 @@ function update() {
     score++;
     playScoreBeep();
     resetBall();
-    if (score % 5 === 0) ball.speed += 0.5;
+    // Aumentar velocidad en cada captura
+    ball.speed += 0.2; // Incremento más suave y gradual
   }
 
   // Si cae fuera del canvas
