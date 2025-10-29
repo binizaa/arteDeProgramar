@@ -1,15 +1,16 @@
-// ...existing code...
 const cells = document.querySelectorAll('.cell');
 const statusDisplay = document.getElementById('status');
 const resetButton = document.getElementById('reset-button');
 const board = document.getElementById('board');
-const modeSelect = document.getElementById('mode'); // Nuevo: selector de modo
+const modeSelect = document.getElementById('mode');
 
 // Estado del juego
 let gameActive = true;
 let currentPlayer = 'X';
-let gameState = ["", "", "", "", "", "", "", "", ""]; // Representa el tablero (9 celdas)
-let mode = modeSelect ? modeSelect.value : 'pvp'; // 'pvp' or 'pvc'
+let startingPlayer = 'X'; // Quién empieza la partida actual
+let gameState = ["", "", "", "", "", "", "", "", ""];
+let mode = modeSelect ? modeSelect.value : 'pvp';
+let isProcessing = false; // Para evitar múltiples clics
 
 // Posibilidades de victoria
 const winningConditions = [
@@ -73,30 +74,35 @@ function handleCellClick(clickedCellEvent) {
     const clickedCell = clickedCellEvent.target;
     const clickedCellIndex = parseInt(clickedCell.getAttribute('data-index'));
 
-    if (gameState[clickedCellIndex] !== "" || !gameActive) {
+    // Prevenir clics múltiples o en celdas ocupadas
+    if (gameState[clickedCellIndex] !== "" || !gameActive || isProcessing) {
         return;
     }
 
-    handleCellPlayed(clickedCell, clickedCellIndex);
-    handleResultValidation(); // Esta función ahora tiene la lógica nueva
-
-    if (gameActive) { 
-        startTimer();
-    } else {
-        stopTimer(); 
-    }
-    // Si estamos en modo vs CPU, permitir clic solo cuando es el turno del jugador humano (X)
-    if (mode === 'pvc' && currentPlayer !== 'X') {
+    // En modo vs CPU, solo permitir clics cuando es turno del jugador X
+    if (mode === 'pvc' && currentPlayer === 'O') {
         return;
     }
 
-    // Actualiza el estado del juego y la interfaz
+    // Marcar que estamos procesando
+    isProcessing = true;
+
+    // Realizar el movimiento
     handleCellPlayed(clickedCell, clickedCellIndex);
     handleResultValidation();
 
-    // Si modo vs CPU y el juego sigue activo y ahora es turno de la CPU, pedir movimiento
-    if (mode === 'pvc' && gameActive && currentPlayer === 'O') {
-        makeComputerMove();
+    if (gameActive) { 
+        startTimer();
+        
+        // Si es modo vs CPU y ahora es turno de O, la computadora juega
+        if (mode === 'pvc' && currentPlayer === 'O') {
+            makeComputerMove();
+        } else {
+            isProcessing = false;
+        }
+    } else {
+        stopTimer();
+        isProcessing = false;
     }
 }
 
@@ -262,7 +268,7 @@ function handleCellPlayed(clickedCell, clickedCellIndex) {
 // ===========================================
 function handleResultValidation() {
     let roundWon = false;
-    let winningConditionIndex = -1; // Para guardar QUÉ condición ganó (0-7)
+    let winningConditionIndex = -1;
 
     for (let i = 0; i < winningConditions.length; i++) {
         const winCondition = winningConditions[i];
@@ -275,7 +281,7 @@ function handleResultValidation() {
         }
         if (a === b && b === c) {
             roundWon = true;
-            winningConditionIndex = i; // Guardamos el índice (0-7) de la condición ganadora
+            winningConditionIndex = i;
             break; 
         }
     }
@@ -284,8 +290,6 @@ function handleResultValidation() {
         statusDisplay.innerHTML = winningMessage();
         gameActive = false; 
         stopTimer(); 
-
-        // ❗️MODIFICADO: Aplicamos la clase de victoria al TABLERO, no a las celdas
         board.classList.add(`win-condition-${winningConditionIndex}`); 
         return;
     }
@@ -298,6 +302,7 @@ function handleResultValidation() {
         return;
     }
 
+    // Cambiar de jugador solo si el juego continúa
     handlePlayerChange();
 }
 
@@ -311,22 +316,31 @@ function handlePlayerChange() {
 // ===========================================
 function handleRestartGame() {
     gameActive = true;
-    currentPlayer = 'X';
+    
+    // Alternar quién empieza después de cada reinicio
+    startingPlayer = startingPlayer === 'X' ? 'O' : 'X';
+    currentPlayer = startingPlayer;
+    
     gameState = ["", "", "", "", "", "", "", "", ""];
     statusDisplay.innerHTML = currentPlayerTurn();
+    isProcessing = false;
 
     cells.forEach(cell => {
-        cell.innerHTML = ""; // Limpia los SVG
+        cell.innerHTML = "";
         cell.classList.remove('x');
         cell.classList.remove('o');
     });
 
-    // ❗️MODIFICADO: Limpiamos todas las clases de victoria del TABLERO
     for (let i = 0; i < 8; i++) {
         board.classList.remove(`win-condition-${i}`);
     }
 
     startTimer();
+    
+    // Si es modo CPU y empieza O (la computadora), que haga su movimiento
+    if (mode === 'pvc' && currentPlayer === 'O') {
+        makeComputerMove();
+    }
 }
 
 // Añade los 'event listeners' (escuchadores de eventos)
@@ -342,21 +356,41 @@ if (modeSelect) {
 }
 
 // ---- Lógica simple de CPU ----
-// Estrategia: 1) gana si puede, 2) bloquea si el jugador puede ganar, 3) centro, 4) esquinas, 5) aleatorio
-
 function makeComputerMove() {
-    if (!gameActive) return;
-    if (currentPlayer !== 'O') return;
+    if (!gameActive) {
+        isProcessing = false;
+        return;
+    }
+    if (currentPlayer !== 'O') {
+        isProcessing = false;
+        return;
+    }
 
     // Pequeña demora para simular "pensar"
     setTimeout(() => {
         const move = findBestMove('O');
-        if (move === null) return;
+        if (move === null) {
+            isProcessing = false;
+            return;
+        }
+        
         const cell = document.querySelector(`.cell[data-index="${move}"]`);
-        if (!cell) return;
+        if (!cell) {
+            isProcessing = false;
+            return;
+        }
+        
         handleCellPlayed(cell, move);
         handleResultValidation();
-    }, 350);
+        
+        if (gameActive) {
+            startTimer();
+        } else {
+            stopTimer();
+        }
+        
+        isProcessing = false;
+    }, 500);
 }
 
 function findBestMove(player) {
@@ -414,4 +448,3 @@ function checkWinFor(player) {
 
 // Si el modo es pvc y la CPU debe moverse al inicio (si quisieras permitir que CPU empiece),
 // podrías comprobar aquí y llamar a makeComputerMove() cuando corresponda.
-// ...existing code...
