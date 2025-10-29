@@ -107,7 +107,7 @@ function handleCellClick(clickedCellEvent) {
 }
 
 // Estilos de animación para los personajes
-const styleSheet = document.createElement("style");
+const styleSheet = document.createElement("style");  //hola
 styleSheet.textContent = `
     .cell {
         display: flex !important;
